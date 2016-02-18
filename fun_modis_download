@@ -7,7 +7,7 @@
 # MODIS data download
 
 
-library(modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=c("MOD09GQ","MYD09GQ"), version=version) {
+modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=c("MOD09GQ","MYD09GQ"), version=version) {
   
   #---------------------------------------------------------------------------------------------------------------#
   #---------------------------------------------------------------------------------------------------------------#
@@ -56,7 +56,7 @@ library(modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=
   pkgTest("RCurl")
   library("RCurl")
   
-  setInternet2(use=FALSE)
+  #setInternet2(use=FALSE)
   
   #---------------------------------------------------------------------------------------------------------------#
   #4. process temporal constraints info.
@@ -90,16 +90,16 @@ library(modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=
   nYears = (eYear - sYear) + 1
   
   #extract temporal boundaries per year
-  tb = list()
+  tb = vector("list",nYears)
   if(sYear == eYear) {tb[[1]] = c(sDoy,eDoy)}
   if(sYear != eYear) {
     for(y in 1:nYears){
       if(y != nYears) {
         if((sYear+(y-1) %% 4) > 1) {nDays = 366} else {nDays = 365}   #number of days in the year
-        if(y == 1) {tb[[1]] = c(sDoy,nDays)}
-        if(y > 1) {tb[[length(tb)+1]] == c(0,nDays)}
+        if(y == 1) {tb[[y]] = c(sDoy,nDays)}
+        if(y > 1) {tb[[y]] = c(0,nDays)}
       }
-      if(y == nYears) {tb[[length(tb)+1]] = c(0,as.numeric(eDoy))}
+      if(y == nYears) {tb[[y]] = c(0,as.numeric(eDoy))}
     }
   }
   
@@ -127,9 +127,10 @@ library(modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=
         doyURL = paste(baseURL, dirLs[[1]][loc[l]], '/', sep="")
         ls = strsplit(getURL(doyURL,verbose=FALSE,ftp.use.epsv=FALSE,dirlistonly = TRUE), "\r\n", fixed=TRUE)
         tFile = ls[[1]][grep(paste("h", h, "v", v, sep=""), ls[[1]])]
-        download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), quiet=TRUE)
+        #download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), quiet=TRUE)
+        download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), method="libcurl", quiet=TRUE)
         
-        rm(doyURL, ls, tFile, fMatch) #remove temporary variables
+        rm(doyURL, ls, tFile) #remove temporary variables
         
       }
       
