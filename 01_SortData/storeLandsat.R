@@ -45,7 +45,7 @@ storeLandsat <- function(zpPath, ltPath, c1=T) {
   if(!dir.exists(ltPath)) {stop('error: path where acquisition will be stored not found')} else {file.path(ltPath)}
   
   # make metadata and sr directories
-  mPath <- paste0(ltPath, '/infos/metadata/')
+  mPath <- paste0(ltPath, '/infos/metadata/stored/')
   dir.create(mPath)
   ltPath <- paste0(ltPath, '/sr/')
   dir.create(ltPath)
