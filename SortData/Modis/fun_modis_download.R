@@ -1,10 +1,8 @@
 # ##################
-# R code for downloading MODIS data
 # February 2016
 # author: Ruben Remelgado
-# mail: first.lastname@uni-wuezburg.de
-# purpose:
-# MODIS data download
+# mail: rube.remelgado@uni-wuerzburg.de
+# purpose: MODIS data download
 
 
 modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=c("MOD09GQ","MYD09GQ"), version=version) {
@@ -128,7 +126,7 @@ modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=c("MOD09
         ls = strsplit(getURL(doyURL,verbose=FALSE,ftp.use.epsv=FALSE,dirlistonly = TRUE), "\r\n", fixed=TRUE)
         tFile = ls[[1]][grep(paste("h", h, "v", v, sep=""), ls[[1]])]
         #download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), quiet=TRUE)
-        download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), method="libcurl", quiet=TRUE)
+        download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), mode="wb", method="libcurl", quiet=TRUE)
         
         rm(doyURL, ls, tFile) #remove temporary variables
         
@@ -140,5 +138,66 @@ modis_download = function(h=h, v=v, start=start, end=end, odir=odir, ds=c("MOD09
   }
   
   #---------------------------------------------------------------------------------------------------------------#
+  
+}
+
+#-----------------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------#
+
+modis_mcd12_download = function(h=h, v=v, year=year, odir=odir, version=version) {
+  
+  #---------------------------------------------------------------------------------------------------------------#
+  #1. specify / check output directory
+  #---------------------------------------------------------------------------------------------------------------#
+  
+  year = as.character(year)
+  version = as.character(version)
+  if(substr(odir,nchar(odir),nchar(odir)) != "/") {odir = paste(odir, "/", sep="")}
+  
+  #---------------------------------------------------------------------------------------------------------------#
+  #2. define target path/row
+  #---------------------------------------------------------------------------------------------------------------#
+  
+  if(h < 10) {h = paste('0', as.character(h), sep="")} else {h = as.character(h)}
+  if(v < 10) {v = paste('0', as.character(v), sep="")} else {v = as.character(v)} 
+  
+  #---------------------------------------------------------------------------------------------------------------#
+  #3. call required packages
+  #---------------------------------------------------------------------------------------------------------------#
+  
+  #check if package is isntalled
+  pkgTest <- function(x){
+    if (!require(x,character.only = TRUE)){
+      install.packages(x,dep=TRUE)
+      if(!require(x,character.only = TRUE)) stop("Package not found")
+    }
+  }
+  
+  pkgTest("RCurl")
+  library("RCurl")
+  
+  #setInternet2(use=FALSE)
+  
+  #---------------------------------------------------------------------------------------------------------------#
+  # download land cover information
+  #---------------------------------------------------------------------------------------------------------------#
+  
+  server = paste("ftp://ladsftp.nascom.nasa.gov/allData/", version[1], "/", sep="")
+  baseURL = paste(server, 'MCD12Q1', "/", year, "/001/", sep="")
+  
+  ls = strsplit(getURL(baseURL,verbose=FALSE,ftp.use.epsv=FALSE,dirlistonly = TRUE), "\r\n", fixed=TRUE)
+  tFile = ls[[1]][grep(paste("h", h, "v", v, sep=""), ls[[1]])]
+  download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), mode="wb", method="libcurl", quiet=TRUE)
+  
+  #---------------------------------------------------------------------------------------------------------------#
+  # download SoS / EoS information
+  #---------------------------------------------------------------------------------------------------------------#
+  
+  server = paste("ftp://ladsftp.nascom.nasa.gov/allData/", version[2], "/", sep="")
+  baseURL = paste(server, 'MCD12Q2', "/", year, "/001/", sep="")
+  
+  ls = strsplit(getURL(baseURL,verbose=FALSE,ftp.use.epsv=FALSE,dirlistonly = TRUE), "\r\n", fixed=TRUE)
+  tFile = ls[[1]][grep(paste("h", h, "v", v, sep=""), ls[[1]])]
+  download.file(paste(doyURL, tFile, sep=""), paste(odir, tFile, sep=""), mode="wb", method="libcurl", quiet=TRUE)
   
 }
