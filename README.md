@@ -3,6 +3,9 @@ R scripts by members of the Department of Remote Sensing at the University of Wu
 
 
 ### Folder description:
+
+* ***00_DataDownload***: Functions to download satellite and auxiliary data.
+
 * ***01_SortData***: Functions to store satellite data within a consistent data structure.
 
 * ***02_PreProcess***: Tools for general pre-processing of satellite data (e.g. crop, reproject) following the structure provided by the scripts in 01_SortData.
