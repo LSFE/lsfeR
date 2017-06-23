@@ -22,33 +22,36 @@
 # author: Ruben Remelgado (ruben.remelgado@uni-wuerzburg.de)
 #---------------------------------------------------------------------------------------------------------------------#
 
-#check if package is isntalled
-pkgTest <- function(x){
-  if (!require(x,character.only = TRUE)){
-    install.packages(x,dep=TRUE)
-    if(!require(x,character.only = TRUE)) stop("Package not found")
-  }
-}
-pkgTest("raster")
-pkgTest("XML")
-
-# load packages
-library(raster)
-library(XML)
-
-#---------------------------------------------------------------------------------------------------------------------#
-
 storeLandsat <- function(zpPath, ltPath, c1=T) {
   
-  # check directories
-  if(!dir.exists(zpPath)) {stop('error: path containing zip files not found')} else {file.path(zpPath)}
-  if(!dir.exists(ltPath)) {stop('error: path where acquisition will be stored not found')} else {file.path(ltPath)}
+#---------------------------------------------------------------------------------------------------------------------#
+  # 0. install/load required packages
+#---------------------------------------------------------------------------------------------------------------------#
+  
+  #check if package is isntalled
+  pkgTest <- function(x){
+    if (!require(x,character.only = TRUE)){
+      install.packages(x,dep=TRUE)
+      if(!require(x,character.only = TRUE)) stop("Package not found")
+    }
+  }
+  pkgTest("raster")
+  pkgTest("XML")
+  
+  # load packages
+  library(R.utils)
+  library(raster)
+  library(XML)
+  
+#---------------------------------------------------------------------------------------------------------------------#
   
   # make metadata and sr directories
+  if (!exists('zpPath')) {stop('error: "input path files missing')} else {zpPath <- file.path(zpPath)}
+  if (!exists('zpPath')) {stop('error: "output path missing')} else {zpPath <- file.path(ltPath)}
   mPath <- paste0(ltPath, '/infos/metadata/stored/')
-  dir.create(mPath)
+  if (!dir.exists(mPath)) {dir.create(mPath)}
   ltPath <- paste0(ltPath, '/sr/')
-  dir.create(ltPath)
+  if(!dir.exists(ltPath)) {dir.create(ltPath)}
   
   # control variables for bit conversion
   a<-2^(0:15)
@@ -59,18 +62,18 @@ storeLandsat <- function(zpPath, ltPath, c1=T) {
 #---------------------------------------------------------------------------------------------------------------------#
   
   # list zip files
-  files <- list.files(zpPath, 'tar.gz')
+  files <- list.files(zpPath, 'tar.gz', full.names=T)
   
   for (f in 1:length(files)) {
     
     # make/check target directory
-    tile <- substr(files[f], 5, 10)
-    tPath <- paste0(ltPath, '/', tile, '/')
+    tile <- substr(basename(files[f]), 5, 10)
+    tPath <- paste0(ltPath, tile, '/')
     if(!dir.exists(tPath)) {dir.create(tPath)}
     
     # unzip file
-    aPath <- paste0(tPath, strsplit(files[f], '[.]')[[1]][1])
-    unzip(file, exdir=aPath)
+    aPath <- paste0(tPath, strsplit(basename(files[f]), '[.]')[[1]][1])
+    untar(files[f], exdir=aPath, tar = "internal")
     
     # if dealing with collection 1 translate quality layer
     if (c1==T) {
