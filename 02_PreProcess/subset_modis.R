@@ -21,7 +21,7 @@
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
 #subset modis data
 
-pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
+pp13Q1 = function(tpath=tpath, opath=opath, tvi='ndvi', cc='strict', rr=NULL) {
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
@@ -46,17 +46,18 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
   if (!exists('opath')) {stop('error: "opath" is missing')}
   opath <- file.path(opath) # remove unwanted separators
   if (!dir.exists(opath)) {stop('error: output path does not exist')}
-  if (length(vi)!=1) {stop('error: "vi" has too many arguments')}
-  if (!vi %in% c('ndvi', 'evi')) {stop('error: "vi" is not valid (use one of "ndvi" or "evi")')}
+  if (length(tvi)!=1) {stop('error: "tvi" has too many arguments')}
+  if (!tvi %in% c('ndvi', 'evi')) {stop('error: "tvi" is not valid (use one of "ndvi" or "evi")')}
   if (length(cc)>1) {stop('error: "cc" has too  many arguments')}
-  if (min(cc%in%c('strict', 'permissive', 'none'))==0) {stop('error: "cc" not valid (use "strict", "permissive" or "none")')}
+  if (!is.null(cc)) {if (min(cc%in%c('strict', 'permissive', 'none'))==0) {
+    stop('error: "cc" not valid (use "strict", "permissive" or "none")')}} else {cc<-'strict'}
   if (!is.null(rr)) {
     if (!class(rr)[1] %in% c('RasterLayer', 'RasterStack', 'RasterBrick')) {
       stop('error: "re" is not a valid raster object')
     } else {
       rp <- crs(rr) # arget projection
       pr <- res(rr) # target resolution
-      if (!is.null(rp)) {stop('error: "re" does not contain a valid projection')}
+      if (is.null(rp@projargs)) {stop('error: "re" does not contain a valid projection')}
       if (bp@projargs!=rp@projargs) {re<-projectExtent(rr, bp)} else {re<-extent(rr)}
     }
   }
@@ -64,9 +65,9 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
   # list files
-  vi.ls <- list.files(paste0(tpath, '/VI'), paste0(vi, '.tif'), full.names=T) # vegetation index
-  da.ls <- list.files(paste0(tpath, '/QA'), 'doa.tif', full.names=T) # day of acquisition
-  pr.ls <-list.files(paste0(tpath, '/QA'), 'prel.tif', full.names=T) # pixel reliability
+  vi.ls <- list.files(paste0(tpath, '/VI'), paste0(tvi, '.tif$'), full.names=T) # vegetation index
+  da.ls <- list.files(paste0(tpath, '/QA'), 'doa.tif$', full.names=T) # day of acquisition
+  pr.ls <-list.files(paste0(tpath, '/QA'), 'prel.tif$', full.names=T) # pixel reliability
   
   # check if number of files is consistent
   l1 <- length(vi.ls)
@@ -82,7 +83,7 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
   # check if image pairs come from the same acquistion)
-  c1 <- sapply(vi.ls, function(x) {strsplit(basename(x), paste0(vi, '.tif'))[[1]][1]})
+  c1 <- sapply(vi.ls, function(x) {strsplit(basename(x), paste0(tvi, '.tif'))[[1]][1]})
   c2 <- sapply(da.ls, function(x) {strsplit(basename(x), 'doa.tif')[[1]][1]})
   c3 <- sapply(pr.ls, function(x) {strsplit(basename(x), 'prel.tif')[[1]][1]})
   cv <- (c1==c2) + (c1==c3) + (c2==c3)
@@ -97,14 +98,16 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
 
   # create output directories
   viPath <- paste0(opath, '/VI/')
+  if (!dir.exists(viPath)) {dir.create(viPath)}
   qaPath <- paste0(opath, '/QA/')
+  if (!dir.exists(qaPath)) {dir.create(qaPath)}
   
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
   for (i in 1:l1) {
     
     # read images
-    if (!is.null(rr)) {
+    if (is.null(rr)) {
       vi <- raster(vi.ls[i])
       da <- raster(da.ls[i])
       pr <- raster(pr.ls[i])
@@ -116,8 +119,8 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
     
     # mask vi image (if cc is "none" no masking is performed)
     if (cc=='strict') {
-      vi[pr!=0] <- NA
-      da[pr!=0] <- NA
+      vi[pr>0] <- NA
+      da[pr>0] <- NA
     }
     if (cc=='premissive') {
       vi[pr>1] <- NA
@@ -125,20 +128,22 @@ pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
     }
     
     # reproject images if required
-    if (bp@projargs!=bp@projargs) {
-      vi <- projectRaster(vi, rr, res=pr)
-      da <- projectRaster(da, rr, res=pr)
-      if (cc=='none') {pr <- projectRaster(da, rr, res=pr)}
+    if (!is.null(rr)) {
+      if (bp@projargs!=rp@projargs) {
+        vi <- projectRaster(vi, rr, res=pr)
+        da <- projectRaster(da, rr, res=pr)
+        if (cc=='none') {pr <- projectRaster(da, rr, res=pr)}
+      }
     }
     
     # write images
     oname <- paste0(viPath, basename(vi.ls[i]))
     writeRaster(vi, oname, overwrite=T)
     oname <- paste0(qaPath, basename(da.ls[i]))
-    writeRaster(vi, oname, overwrite=T)
+    writeRaster(da, oname, overwrite=T)
     if (cc=='none') {
       oname <- paste0(qaPath, basename(pr.ls[i]))
-      writeRaster(vi, oname, overwrite=T)
+      writeRaster(pr, oname, overwrite=T)
     }
     
   }
