@@ -1,113 +1,148 @@
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
+# Description
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+# Pre-processing of MODIS data. Allows for cropping, masking and reprojecting.
+
+# Variables
+# tpath: path to the tile of interest.
+# opath: path were output will be written.
+# vi: one of "ndvi" or "evi". Specifies which vegetation index will be taken.
+# cc: one of "strict", "permissive" or "none".
+# rr: object of class "RasterLayer", "RasterStack" or "RasterBrick".
+
+#Notes:
+# -  "cc" is used for cloud control. If "strict" only good quality pixels are mantained. 
+#       The "permissive" setting allows for the inclusion of pixels with "marginal" quality.
+#       "none" will not perform any masking. If selected, the code will also write the pixel reliability layer.
+# -   "rr" provides access to a reference raster layer which will be used for cropping.
+#     If "rr" has different projection the output will be reprojected. When reprojecting, 
+#       the resolution of "rr" will define the resolution of the output.
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
 #subset modis data
 
-modis_subset = function(ipath=ipath, opath=opath, se=se, oproj=oproj, tiles=tiles, year=year, bs=bs) {
+pp13Q1 = function(tpath=tpath, opath=opath, vi='ndvi', cc='strict', rr=NULL) {
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
   
-  library(raster)
-  
-  # determine subset coordinates and target tiles
-  shp = shapefile(tiles)
-  ss = as(se, 'SpatialPolygons')
-  crs(ss) <- oproj
-  e = extent(spTransform(ss, crs(shp)))
-  s = crop(shapefile(tiles),e)
-  h = s$h
-  v = s$v
-  tile = c()
-  for(t in 1:length(s$h)) {
-    if(s$v[t] < 10){v = paste('0', as.character(s$v[t]), sep='')} else {v = as.character(s$v[t])}
-    if(s$v[t] < 10){v = paste('0', as.character(s$v[t]), sep='')} else {v = as.character(s$v[t])}
-    tile = c(tile, paste('h', h, 'v', v, sep=''))
-  }
-  tile = unique(tile)
-  
-  # test if tiles really overlap (shapefile does not fit to actual data)
-  check = c()
-  for (t in 1:length(tile)) {
-    re = extent(raster((list.files(paste(ipath,tile[t], sep=''), paste('A', as.character(year), '.*.ndvi.tif', sep=''), recursive=T, full.names=T))[1]))
-    check = c(check,re@xmin > e@xmax || re@xmax < e@xmin || re@ymax < e@ymin || re@ymin > e@ymax)
-  }
-  tile = tile[which(check == FALSE)]
-  
-  # update year list
-  yr.ls = year
-  if(bs > 0) {
-    for (y in 1:bs) {
-      yr.ls = c(yr.ls, year-y)
-      yr.ls = c(yr.ls, year+y)
+  #check if package is isntalled
+  pkgTest <- function(x){
+    if (!require(x,character.only = TRUE)){
+      install.packages(x,dep=TRUE)
+      if(!require(x,character.only = TRUE)) stop("Package not found")
     }
   }
-  yr.ls = sort(unique(yr.ls))
+  pkgTest("raster")
   
-  # mosaic time-steps (if dealing with more than one tile)
-  for (y in 1:length(yr.ls)) {
-    
-    if (length(tile) > 1) {
-      
-      # list images
-      imgls1_a = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.ndvi.tif', sep=''), recursive=T, full.names=T)
-      imgls1_b = list.files(paste(ipath,tile[2], sep=''), paste('A', yr.ls[y], '.*.ndvi.tif', sep=''), recursive=T, full.names=T)
-      imgls2_a = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.prel.tif', sep=''), recursive=T, full.names=T)
-      imgls2_b = list.files(paste(ipath,tile[2], sep=''), paste('A', yr.ls[y], '.*.prel.tif', sep=''), recursive=T, full.names=T)
-      imgls3_a = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.doa.tif', sep=''), recursive=T, full.names=T)
-      imgls3_b = list.files(paste(ipath,tile[2], sep=''), paste('A', yr.ls[y], '.*.doa.tif', sep=''), recursive=T, full.names=T)
-      
-      # set output path
-      setwd(opath)
-      
-      # extract/mosaic image subset
-      for(i in 1:length(imgls1_a)) {
-        
-        # mosaic and reproject
-        r1 = crop(raster(imgls1_a[i]), e) / 10000^2
-        r1[r1 <= -0.3] = NA
-        r1[crop(raster(imgls2_a[i]), e) > 1] = NA
-        r2 = crop(raster(imgls1_b[i]), e)/ 10000^2
-        r2[r2 <= -0.3] = NA
-        r2[crop(raster(imgls2_b[i]), e) > 1] = NA
-        ndvi = projectRaster(mosaic(r1,r2, fun=mean), res=250, crs=crs(oproj))
-        r1 = crop(raster(imgls3_a[i]), e)
-        r2 = crop(raster(imgls3_b[i]), e)
-        doa = projectRaster(mosaic(r1,r2, fun=mean), res=250, crs=crs(oproj))
-        
-        # write layer
-        writeRaster(ndvi, filename=basename(imgls1_a[i]), driver='GTiff', datatype='FLT4S')
-        writeRaster(doa, filename=basename(imgls3_a[i]), driver='GTiff', datatype='INT4S')
-        
-      }
-      
-      rm(imgls1_a, imgls1_b, imgls2_a, imgls2_b, imgls3_a, imgls3_b, r1, r2)
-      
+  # base projection system
+  bp <- crs("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+  
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+  
+  # check variables
+  if (!exists('tpath')) {stop('error: "tpath" is missing')}
+  if (!dir.exists(tpath)) {stop('error: tile path does not exist')}
+  tpath <- file.path(tpath) # remove unwanted separators
+  if (!exists('opath')) {stop('error: "opath" is missing')}
+  opath <- file.path(opath) # remove unwanted separators
+  if (!dir.exists(opath)) {stop('error: output path does not exist')}
+  if (length(vi)!=1) {stop('error: "vi" has too many arguments')}
+  if (!vi %in% c('ndvi', 'evi')) {stop('error: "vi" is not valid (use one of "ndvi" or "evi")')}
+  if (length(cc)>1) {stop('error: "cc" has too  many arguments')}
+  if (min(cc%in%c('strict', 'permissive', 'none'))==0) {stop('error: "cc" not valid (use "strict", "permissive" or "none")')}
+  if (!is.null(rr)) {
+    if (!class(rr)[1] %in% c('RasterLayer', 'RasterStack', 'RasterBrick')) {
+      stop('error: "re" is not a valid raster object')
     } else {
-      
-      # list images
-      imgls1 = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.ndvi.tif', sep=''), recursive=T, full.names=T)
-      imgls2 = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.prel.tif', sep=''), recursive=T, full.names=T)
-      imgls3 = list.files(paste(ipath,tile[1], sep=''), paste('A', yr.ls[y], '.*.doa.tif', sep=''), recursive=T, full.names=T)
-      
-      # set output path
-      setwd(opath)
-      
-      # extract image subset
-      for(i in 1:length(imgls1)) {
-        
-        # mask outliers / bad quality pixels
-        tmp = crop(raster(imgls1[i]),e) / 10000^2
-        tmp[tmp <= -0.3] = NA
-        tmp[crop(raster(imgls2[i]), e) > 1] = NA
-        
-        # reproject layers
-        ndvi = projectRaster(tmp, res=250, crs=crs(oproj))
-        doa = projectRaster(crop(raster(imgls3[i]),e), res=250, crs=crs(oproj))
-        
-        # write layer
-        writeRaster(ndvi, filename=basename(imgls1[i]), driver='GTiff', datatype='FLT4S')
-        writeRaster(doa, filename=basename(imgls3[i]), driver='GTiff', datatype='INT4S')
-        
-      }
-      
-      rm(imgls1, imgls2, imgls3, tmp)
-      
+      rp <- crs(rr) # arget projection
+      pr <- res(rr) # target resolution
+      if (!is.null(rp)) {stop('error: "re" does not contain a valid projection')}
+      if (bp@projargs!=rp@projargs) {re<-projectExtent(rr, bp)} else {re<-extent(rr)}
     }
   }
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+  
+  # list files
+  vi.ls <- list.files(paste0(tpath, '/VI'), paste0(vi, '.tif'), full.names=T) # vegetation index
+  da.ls <- list.files(paste0(tpath, '/QA'), 'doa.tif', full.names=T) # day of acquisition
+  pr.ls <-list.files(paste0(tpath, '/QA'), 'prel.tif', full.names=T) # pixel reliability
+  
+  # check if number of files is consistent
+  l1 <- length(vi.ls)
+  l2 <- length(da.ls)
+  l3 <- length(pr.ls)
+  if (length(unique(c(l1, l2, l3)))>1) {
+    print(paste0('nr. of vi images:', as.character(l1)))
+    print(paste0('nr. of doa images:', as.character(l3)))
+    print(paste0('nr. of prel images:', as.character(l3)))
+    stop('error: different number of files per category')
+  }
+  
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+  
+  # check if image pairs come from the same acquistion)
+  c1 <- sapply(vi.ls, function(x) {strsplit(basename(x), paste0(vi, '.tif'))[[1]][1]})
+  c2 <- sapply(da.ls, function(x) {strsplit(basename(x), 'doa.tif')[[1]][1]})
+  c3 <- sapply(pr.ls, function(x) {strsplit(basename(x), 'prel.tif')[[1]][1]})
+  cv <- (c1==c2) + (c1==c3) + (c2==c3)
+  if (min(cv)<3) {
+    return(which(cv<3))
+    stop('error: one or more image pair are not from the same acquistion')
+  }
+
+  rm(c1, c2, c3, cv)
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+
+  # create output directories
+  viPath <- paste0(opath, '/VI/')
+  qaPath <- paste0(opath, '/QA/')
+  
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+  
+  for (i in 1:l1) {
+    
+    # read images
+    if (!is.null(rr)) {
+      vi <- raster(vi.ls[i])
+      da <- raster(da.ls[i])
+      pr <- raster(pr.ls[i])
+    } else {
+      vi <- crop(raster(vi.ls[i]), re)
+      da <- crop(raster(da.ls[i]), re)
+      pr <- crop(raster(pr.ls[i]), re)
+    }
+    
+    # mask vi image (if cc is "none" no masking is performed)
+    if (cc=='strict') {
+      vi[pr!=0] <- NA
+      da[pr!=0] <- NA
+    }
+    if (cc=='premissive') {
+      vi[pr>1] <- NA
+      da[pr>1] <- NA
+    }
+    
+    # reproject images if required
+    if (bp@projargs!=bp@projargs) {
+      vi <- projectRaster(vi, rr, res=pr)
+      da <- projectRaster(da, rr, res=pr)
+      if (cc=='none') {pr <- projectRaster(da, rr, res=pr)}
+    }
+    
+    # write images
+    oname <- paste0(viPath, basename(vi.ls[i]))
+    writeRaster(vi, oname, overwrite=T)
+    oname <- paste0(qaPath, basename(da.ls[i]))
+    writeRaster(vi, oname, overwrite=T)
+    if (cc=='none') {
+      oname <- paste0(qaPath, basename(pr.ls[i]))
+      writeRaster(vi, oname, overwrite=T)
+    }
+    
+  }
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+
 }
