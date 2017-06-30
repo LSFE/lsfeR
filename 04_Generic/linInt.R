@@ -1,3 +1,21 @@
+#-------------------------------------------------------------------------------------------------#
+# Description
+#-------------------------------------------------------------------------------------------------#
+# Linear interpolation of MODIS 13Q1 product data for a reference list of dates.
+
+# Variables
+# ipath: Input tile path
+# opath: output path
+# tvi: target vegetation index (one of 'ndvi' or 'evi'). Default is 'ndvi'.
+# td: Vector object of type "Date" with the dates that will be interpolated.
+# bs: Time buffer expressed in number of days. Default is 60.
+# xy: Object of class 'SpatialPoints' or 'SpatialPointsDataFrame'
+
+# NOTES:
+# - If "xy" is provided, the function only interpolates for the target samples.
+
+#-------------------------------------------------------------------------------------------------#
+
 linInt <- function(ipath=ipath, opath=opath, tvi='ndvi', td=td, bs=60, xy=NULL) {
   
   #check if package is isntalled
