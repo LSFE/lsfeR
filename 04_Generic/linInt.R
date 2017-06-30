@@ -1,4 +1,4 @@
-linInt <- function(ipath=ipath, opath=opath, vi='ndvi', td=td, bs=60, xy=NULL) {
+linInt <- function(ipath=ipath, opath=opath, tvi='ndvi', td=td, bs=60, xy=NULL) {
   
   #check if package is isntalled
   pkgTest <- function(x){
@@ -18,17 +18,17 @@ linInt <- function(ipath=ipath, opath=opath, vi='ndvi', td=td, bs=60, xy=NULL) {
   if (!exists('opath')) {stop('error: "opath" is missing')}
   if (!dir.exists(opath)) {stop('error: output path does not exist')}
   opath <- file.path(opath)
-  if (length(vi)!=1) {stop('error: "vi" has too many arguments')}
   if (!exists('td')) {stop('error: "td" is missing')}
   if(class(td)!='Date') {stop('error: "td" is not a "Date" object')}
-  if (!vi %in% c('ndvi', 'evi')) {stop('error: "vi" is not valid (use one of "ndvi" or "evi")')}
+  if (length(tvi)!=1) {stop('error: "tvi" has too many arguments')}
+  if (!tvi %in% c('ndvi', 'evi')) {stop('error: "tvi" is not valid (use one of "ndvi" or "evi")')}
   if (!is.null(xy)) {if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {
       stop('error: "shp is nor a valid point shapefile object')}}
   
 #-------------------------------------------------------------------------------------------------#
   
   # list/read image data
-  img.ls <- list.files(paste0(ipath, '/VI'), paste0(vi, '.tif$'), full.names=T)
+  img.ls <- list.files(paste0(ipath, '/VI'), paste0(tvi, '.tif$'), full.names=T)
   iyr <- as.Date(sapply(img.ls, function(x) {
     paste0(substr(strsplit(basename(x), '[.]')[[1]][2], 2, 5),'-01-01')}))
   vis <- stack(img.ls)
@@ -62,19 +62,24 @@ linInt <- function(ipath=ipath, opath=opath, vi='ndvi', td=td, bs=60, xy=NULL) {
   viData <- vis[up]
   daData <- das[up]
   nr <- nrow(viData)
+  tmp <- vis[[1]]
+  if (is.null(xy)) {tmp[,]<-NA} else {
+    odf<-data.frame(date=td, matrix(0,length(td),nr), stringsAsFactors=F)}
   
 #-------------------------------------------------------------------------------------------------#  
   
   # interpolation function
   int <- function(i) {
-    vi <- viData[i,]
-    da <- julian((iyr+daData[i,])-1)
-    bi <- which(is.finite(vi) & da > (pd-bs))
-    ai <- rev(which(is.finite(vi) & da < (pd+bs)))
-    if (length(bi)>0 & length(ai)>0) {
-      lc <- lm(c(vi[bi[1]],vi[ai[1]])~c(da[bi[1]],da[ai[1]]))
-      return(as.numeric(pd*lc$coefficients[2]+lc$coefficients[1]))
-    } else {return(NA)}
+    vi <- as.numeric(viData[i,])
+    da <- as.numeric(julian((iyr+daData[i,])-1))
+    di <- which(da==pd)
+    if (length(di)>0) {return(mean(vi[di]))} else {
+      bi <- rev(which(!is.na(vi) & da < pd & da >= (pd-bs)))
+      ai <- which(!is.na(vi) & da > pd & da <= (pd+bs))
+      if (length(bi)>0 & length(ai)>0) {
+        lc <- lm(c(vi[bi[1]],vi[ai[1]])~c(da[bi[1]],da[ai[1]]))
+        return(as.numeric(pd*lc$coefficients[2]+lc$coefficients[1]))
+      } else {return(NA)}}
   }
   
 #-------------------------------------------------------------------------------------------------#  
@@ -83,11 +88,22 @@ linInt <- function(ipath=ipath, opath=opath, vi='ndvi', td=td, bs=60, xy=NULL) {
   bn <- strsplit(basename(img.ls[1]), '[.]')[[1]][c(1,3,4,6)]
   for (d in 1:length(td)) {
     pd <- julian(td[d])
-    r <- setValues(sapply(1:nr, int)*0.0001^2, vis[[1]])
+    r <- sapply(1:nr, int)
     pd <- paste0(strsplit(as.character(td[d]), '-')[[1]], collapse='') # processed date
     cd <- paste0(strsplit(as.character(Sys.Date()), '-')[[1]], collapse='') # processing date
-    oname <- paste(bn[1], 'A', pd, bn[2], bn[3], bn[4], cd, 'tif', sep='.')
-    writeRaster(r, paste0(opath, '/', oname), datatype='FLT4S')
+    if (is.null(xy)) {
+      r <- setValues(r, tmp)
+      oname <- paste(bn[1], paste0('A', pd), bn[2], bn[3], bn[4], cd, 'tif', sep='.')
+      writeRaster(r, paste0(opath, '/', oname), datatype='FLT4S')
+    } else {odf[d,2:(nr+1)] <- r}
+  }
+  
+  if (!is.null(xy)) {
+    cd <- paste0(strsplit(as.character(Sys.Date()), '-')[[1]], collapse='') 
+    pd1 <- paste0(strsplit(as.character(td[1]), '-')[[1]], collapse='') # start date
+    pd2 <- paste0(strsplit(as.character(td[length(td)]), '-')[[1]], collapse='') # end date
+    oname <- paste(bn[1], paste0(pd1, '-', pd2), bn[2], bn[3], bn[4], cd, 'csv', sep='.')
+    write.csv(odf, paste0(opath, '/', oname), row.names=F)
   }
   
 #-------------------------------------------------------------------------------------------------#  
