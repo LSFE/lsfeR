@@ -21,7 +21,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
+poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
   
   # check input
   if(is.null('pol')) {stop('error: "pol" is missing')}
