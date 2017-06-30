@@ -138,7 +138,7 @@ pp13Q1 = function(tpath=tpath, opath=opath, tvi='ndvi', cc='strict', rr=NULL) {
     
     # write images
     oname <- paste0(viPath, basename(vi.ls[i]))
-    writeRaster(vi, oname, overwrite=T)
+    writeRaster(vi*0.0001^2, oname, overwrite=T)
     oname <- paste0(qaPath, basename(da.ls[i]))
     writeRaster(da, oname, overwrite=T)
     if (cc=='none') {
