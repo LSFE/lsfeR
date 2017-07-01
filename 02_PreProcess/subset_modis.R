@@ -1,27 +1,31 @@
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
 # Description
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
-# Pre-processing of MODIS data. Allows for cropping, masking and reprojecting.
+# Pre-processing of MODIS 13Q1 data. Allows for cropping, masking and reprojecting.
 
 # Variables
-# tpath: path to the tile of interest.
-# opath: path were output will be written.
-# vi: one of "ndvi" or "evi". Specifies which vegetation index will be taken.
+# ipath: path to the 13Q1 parent directory.
+# opath: path to output folder.
+# tile: Character vector of target tiles (e.g. c('h18v04', 'h18v05')
+# td: Vector of class "Date" with target dates.
+# tvi: one of "ndvi" or "evi". Specifies which vegetation index will be used.
 # cc: one of "strict", "permissive" or "none".
+# col: String element specifying the target collection (e.g. "006").
+# prod: Specifies the target product. One of "MOD" (for TERRA), "MYD" (for AQUA) or "all".
 # rr: object of class "RasterLayer", "RasterStack" or "RasterBrick".
 
 #Notes:
-# -  "cc" is used for cloud control. If "strict" only good quality pixels are mantained. 
-#       The "permissive" setting allows for the inclusion of pixels with "marginal" quality.
-#       "none" will not perform any masking. If selected, the code will also write the pixel reliability layer.
-# -   "rr" provides access to a reference raster layer which will be used for cropping.
+# - "cc" is used for cloud control. If "strict" only good quality pixels are mantained. 
+#     The "permissive" setting allows for the inclusion of pixels with "marginal" quality.
+#     "none" will not perform any masking. If selected, the code will also write the pixel reliability layer.
+# - "rr" provides access to a reference raster layer which will be used for cropping.
 #     If "rr" has different projection the output will be reprojected. When reprojecting, 
-#       the resolution of "rr" will define the resolution of the output.
+#     the resolution of "rr" will define the resolution of the output.
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
 #subset modis data
 
-pp13Q1 = function(tpath=tpath, opath=opath, tvi='ndvi', cc='strict', rr=NULL) {
+pp13Q1 = function(ipath=ipath, opath=opath, tile=tile, td=td, tvi='ndvi', cc='strict', col='006', prod='all', rr=NULL) {
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
@@ -34,28 +38,48 @@ pp13Q1 = function(tpath=tpath, opath=opath, tvi='ndvi', cc='strict', rr=NULL) {
   }
   pkgTest("raster")
   
-  # base projection system
+  # base projection system (sinusoidal)
   bp <- crs("+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
   
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
-  # check variables
-  if (!exists('tpath')) {stop('error: "tpath" is missing')}
-  if (!dir.exists(tpath)) {stop('error: tile path does not exist')}
-  tpath <- file.path(tpath) # remove unwanted separators
+  # check paths
+  if (!exists('ipath')) {stop('error: "ipath" is missing')}
+  if (!dir.exists(ipath)) {stop('error: input path does not exist')}
+  ipath <- file.path(ipath) # remove unwanted separators
   if (!exists('opath')) {stop('error: "opath" is missing')}
   opath <- file.path(opath) # remove unwanted separators
   if (!dir.exists(opath)) {stop('error: output path does not exist')}
+  
+  # check if target collection exists
+  if (length(col)!=1) {stop('error: "col" has too many arguments')}
+  if (!dir.exists(paste0(ipath, '/', col))) {stop('error: collection not found')}
+  
+  # check tiles
+  if (!exists('tile')) {stop('error: "tile" is missing')}
+  tpath <- vector('character', length(tile))
+  for (t in 1:length(tile)) {
+    tpath[t] <- paste0(ipath, '/', tile[t], '/')
+    if (!dir.exists(tpath[t])) {stop(paste0('error: tile ', tile[t], ' missing'))}
+  }
+  
+  # check data constraints
+  if (!exists('td')) {stop('error: "td" is missing')}
+  if (class('td')[1]!='Date') {stop('error: "td" is not a "Date" object')}
   if (length(tvi)!=1) {stop('error: "tvi" has too many arguments')}
   if (!tvi %in% c('ndvi', 'evi')) {stop('error: "tvi" is not valid (use one of "ndvi" or "evi")')}
+  
+  # check data manipulation constraints
   if (length(cc)>1) {stop('error: "cc" has too  many arguments')}
   if (!is.null(cc)) {if (min(cc%in%c('strict', 'permissive', 'none'))==0) {
     stop('error: "cc" not valid (use "strict", "permissive" or "none")')}} else {cc<-'strict'}
+  
+  # check reference raster
   if (!is.null(rr)) {
     if (!class(rr)[1] %in% c('RasterLayer', 'RasterStack', 'RasterBrick')) {
       stop('error: "re" is not a valid raster object')
     } else {
-      rp <- crs(rr) # arget projection
+      rp <- crs(rr) # target projection
       pr <- res(rr) # target resolution
       if (is.null(rp@projargs)) {stop('error: "re" does not contain a valid projection')}
       if (bp@projargs!=rp@projargs) {re<-projectExtent(rr, bp)} else {re<-extent(rr)}
@@ -65,9 +89,9 @@ pp13Q1 = function(tpath=tpath, opath=opath, tvi='ndvi', cc='strict', rr=NULL) {
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
   
   # list files
-  vi.ls <- list.files(paste0(tpath, '/VI'), paste0(tvi, '.tif$'), full.names=T) # vegetation index
-  da.ls <- list.files(paste0(tpath, '/QA'), 'doa.tif$', full.names=T) # day of acquisition
-  pr.ls <-list.files(paste0(tpath, '/QA'), 'prel.tif$', full.names=T) # pixel reliability
+  vi.ls <- list.files(tpath, paste0(tvi, '.tif$'), recursive=T, full.names=T) # vegetation index
+  da.ls <- list.files(tpath, 'doa.tif$', recursive=T, full.names=T) # day of acquisition
+  pr.ls <-list.files(tpath, 'prel.tif$', recursive=T, full.names=T) # pixel reliability
   
   # check if number of files is consistent
   l1 <- length(vi.ls)
