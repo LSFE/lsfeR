@@ -22,12 +22,12 @@ storeModis13Q1 <- function(ipath, opath, vi=c('ndvi', 'evi'), delete=F) {
 #---------------------------------------------------------------------------------------------------------#
 
   # check variables
-  if (!exists('ipath')) {stop('error: input path missing')} else {ipath <- file.path(ipath)}
-  if (!exists('opath')) {stop('error: output path missing')} else {opath <- file.path(opath)}
-  if (dir.exists(ipath)) {ipath <- file.path(ipath)} else {stop('error: input data path not found')}
-  if (dir.exists(opath)) {opath <- file.path(opath)} else {stop('error: output data path not found')}
-  if (min(vi%in%c('ndvi', 'evi'))==0) {stop('error: "vi" argument not valid (use "ndvi", "evi" or both)')}
-  if (!is.logical(delete)) {stop('error: "delete" is not a valid logical argument')}
+  if (!exists('ipath')) {return('error: input path missing')} else {ipath <- file.path(ipath)}
+  if (!exists('opath')) {return('error: output path missing')} else {opath <- file.path(opath)}
+  if (dir.exists(ipath)) {ipath <- file.path(ipath)} else {return('error: input data path not found')}
+  if (dir.exists(opath)) {opath <- file.path(opath)} else {return('error: output data path not found')}
+  if (min(vi%in%c('ndvi', 'evi'))==0) {return('error: "vi" argument not valid (use "ndvi", "evi" or both)')}
+  if (!is.logical(delete)) {return('error: "delete" is not a valid logical argument')}
   
 #---------------------------------------------------------------------------------------------------------#
 
@@ -39,6 +39,7 @@ storeModis13Q1 <- function(ipath, opath, vi=c('ndvi', 'evi'), delete=F) {
     }
   }
   pkgTest("gdalUtils")
+  pkgTest("raster")
   
 #---------------------------------------------------------------------------------------------------------#
   
@@ -84,8 +85,31 @@ storeModis13Q1 <- function(ipath, opath, vi=c('ndvi', 'evi'), delete=F) {
       idr <- sapply(hdf.ls[ind], function(x) {paste0(strsplit(basename(x), '[.]')[[1]][1:4], collapse='.')}) # file path (1)
       idr <- paste0(opath, '/', uc[c], '/', ut[t], '/', idr, '/') # file path (2) 
       
+      # initiate metadata file
+      df <- data.frame(date=adate[ind], path=idr, processed=pdate, clear=vector('numeric', length(idr)), stringsAsFactors=F)
+      
+      # deal with each hdf
+      for (h in 1:length(ind)) {
+        
+        # define base name
+        bname <- paste0(idr[h], basename(idr[h])) # base file name
+        
+        # read / write bands
+        if (!dir.exists(bname)) {dir.create(idr[h])}
+        if ('ndvi'%in%vi) {gdal_translate(hdf.ls[ind[h]], paste0(bname, '.ndvi.tif'), sd_index=1)}
+        if ('evi'%in%vi) {gdal_translate(hdf.ls[ind[h]], paste0(bname, '.evi.tif'), sd_index=2)}
+        gdal_translate(hdf.ls[ind[h]], paste0(bname, '.doa.tif'), sd_index=11)
+        gdal_translate(hdf.ls[h], paste0(bname, '.prel.tif'), sd_index=12)
+        
+        # read pixel reliability and  quantify usable data (excluding background)
+        r <- raster(paste0(bname, '.prel.tif'))
+        df$clear[h] <- cellStats(r==0, sum) / cellStats(r!=255, sum) * 100
+        rm(r)
+        
+        if(delete) {file.remove(hdf.ls[ind[h]])} # delete file if requested
+      }
+      
       # write metadata
-      df <- data.frame(date=adate[ind], path=idr, processed=pdate, stringsAsFactors=F)
       ofile <- paste0(mpath, ut[t], '_metadata.csv')
       if (file.exists(ofile)) {
         df0 <- read.csv(ofile) # see existing metadata
@@ -94,17 +118,6 @@ storeModis13Q1 <- function(ipath, opath, vi=c('ndvi', 'evi'), delete=F) {
         rm(df0)}
       write.csv(df, ofile, row.names=F)
       rm(df)
-      
-      # write files
-      for (h in 1:length(ind)) {
-        bname <- paste0(idr[h], basename(idr[h])) # base file name
-        if (!dir.exists(bname)) {dir.create(idr[h])}
-        if ('ndvi'%in%vi) {gdalUtils::gdal_translate(hdf.ls[ind[h]], paste0(bname, '.ndvi.tif'), sd_index=1)}
-        if ('evi'%in%vi) {gdalUtils::gdal_translate(hdf.ls[ind[h]], paste0(bname, '.evi.tif'), sd_index=1)}
-        gdalUtils::gdal_translate(hdf.ls[ind[h]], paste0(bname, '.doa.tif'), sd_index=11)
-        gdalUtils::gdal_translate(hdf.ls[h], paste0(bname, '.prel.tif'), sd_index=12)
-        if(delete) {file.remove(hdf.ls[ind[h]])} # delete file if requested
-      }
       
     }
   }
