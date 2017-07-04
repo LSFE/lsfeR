@@ -41,13 +41,13 @@ storeLandsat <- function(zpPath, ltPath, c1=T) {
   # load packages
   library(R.utils)
   library(raster)
-  library(XML)
+  library(gdalUtils)
   
   #---------------------------------------------------------------------------------------------------------------------#
   
   # make metadata and sr directories
   if (!exists('zpPath')) {stop('error: "input path files missing')} else {zpPath <- file.path(zpPath)}
-  if (!exists('ltPath')) {stop('error: "output path missing')} else {zpPath <- file.path(ltPath)}
+  if (!exists('ltPath')) {stop('error: "output path missing')} else {ltPath <- file.path(ltPath)}
   mPath <- paste0(ltPath, '/infos/metadata/stored/')
   if (!dir.exists(mPath)) {dir.create(mPath)}
   ltPath <- paste0(ltPath, '/sr/')
@@ -57,27 +57,47 @@ storeLandsat <- function(zpPath, ltPath, c1=T) {
   a<-2^(0:15)
   b<-2*a
   
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 1. unzip and store files
-  #---------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------------#
+# 1. extract file info
+#---------------------------------------------------------------------------------------------------------------------#
   
   # list zip files
   files <- list.files(zpPath, 'tar.gz', full.names=T)
+  cc <- vector('numeric', length(files)) # clear pixels %
   
-  for (f in 1:length(files)) {
+  # extract date information
+  adate <- as.Date(paste0(substr(basename(files), 11, 14), '-', 
+                          substr(basename(files), 15, 16), '-', 
+                          substr(basename(files), 17, 18)))
+  pdate <- sapply(files, function(x){strsplit(basename(x), '-')[[1]][2]})
+  pdate <- as.Date(paste0(substr(basename(pdate), 3, 6), '-', 
+                          substr(basename(pdate), 7, 8), '-', 
+                          substr(basename(pdate), 9, 10)))
+  
+  # determine tiles
+  tiles <- substr(strsplit(basename(files), '-')[[1]][1], 5, 10)
+  ut <- unique(tiles)
+  
+#---------------------------------------------------------------------------------------------------------------------#
+# 2. unzip and store files
+#---------------------------------------------------------------------------------------------------------------------#
+  
+  for (t in 1:length(ut)) {
     
     # make/check target directory
-    tile <- substr(basename(files[f]), 5, 10)
-    tPath <- paste0(ltPath, tile, '/')
+    tPath <- paste0(ltPath, ut[t], '/')
     if(!dir.exists(tPath)) {dir.create(tPath)}
+    ind <- which(tiles==ut[t])
+    odr <- as.character(sapply(files[ind], function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
+    
+    for (f in 1:length(ind))
     
     # unzip file
-    aPath <- paste0(tPath, strsplit(basename(files[f]), '[.]')[[1]][1])
-    untar(files[f], exdir=aPath, tar = "internal")
+    untar(files[f], exdir=odr[f], tar = "internal")
     
     # if dealing with collection 1 translate quality layer
     if (c1==T) {
-      img <- list.files(aPath, 'pixel_qa.', full.names=T)
+      img <- list.files(aPath, 'pixel_qa.tif', full.names=T)
       rr0 <- raster(img)
       rr1 = getValues(rr0)
       rb = as.integer((rr1 %% b[3])>=a[3])
@@ -85,65 +105,22 @@ storeLandsat <- function(zpPath, ltPath, c1=T) {
       rb = rb + (as.integer((rr1 %% b[6])>=a[6])*4)
       rb = rb + ((as.integer((rr1 %% b[5])>=a[5])*3)*(rb==0))
       rb[is.na(rb)] = 255
+      cc[f] <- sum(rb==0) / sum(rb!=255) * 100
       rr0 = raster::setValues(rr0, rb)
-      fe = raster::extension(img.ls[i])
+      fe = raster::extension(img)
       oname = paste0(strsplit(img, fe), '_mask', fe)
       writeRaster(rr0, filename=oname, datatype='INT1U', overwrite=TRUE)
       rm(img, rr0, rr1, rb, oname)
-    }
-    
-  }
-  
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 3. parse metadata
-  #---------------------------------------------------------------------------------------------------------------------#
-  
-  # list tile paths
-  tpath <- list.dirs(ltPath, full.names=T, recursive=F)
-  
-  # loop through each tile
-  for (t in 1:length(tpath)) {
-    
-    # initiate variables
-    dirs <- list.dirs(tpath, full.names=T, recursive=F) # list acquisitions
-    nr <- length(dirs) # number of directories
-    cc <- vector('numeric', nr) # cloud cover
-    sa <- vector('numeric', nr) # sun azimuth
-    sz <- vector('numeric', nr) # sun zenith
-    ad <- vector('numeric', nr) # acquisition day
-    ay <- vector('numeric', nr) # aquisition year
-    ul <- matrix(0, 2, nr) # upper left coordinates
-    lr <- matrix(0, 2, nr) # lower right coordinates
-    ss <- vector('character', nr) # sensor
-    
-    # loop through each directory
-    for (d in 1:length(dirs)) {
-      
-      # read needed data
-      xmlFile <- xmlToList(xmlParse(list.files(dirs[d], '.xml', full.names=T))) # metadata
-      r <- getValues(raster(list.files(dirs[d], 'mask.tif', full.names=T))) # mask
-      
-      # retrieve 
-      cc[d] <- sum(r!=0, na.rm=T) / sum(is.finite(r))
-      sz[d] <- as.numeric(xmlFile[[1]]$solar_angles[[1]])
-      sa[d] <- as.numeric(xmlFile[[1]]$solar_angles[[2]])
-      tmp <- as.Date(xmlFile[[1]]$acquisition_date)
-      ay[d] <- as.character(format(tmp,'%Y'))
-      ad[d] <- as.numeric(tmp-as.Date(paste0(y, '-01-01'))+1)
-      ul[d,] <- as.numeric(xmlFile[[1]]$projection_information[[1]][2:3])
-      lr[d,] <- as.numeric(xmlFile[[1]]$projection_information[[2]][2:3])
-      ss[d] <- xmlFile[[1]]$satellite
-      
-      # remote temporary data
-      rm(xmlFile, r, tmp)
-      
+    } else {
+      r <- raster(list.files(aPath, 'fmask.tif'))
+      cc[f] <- cellStats(r==0) / cellStats(r!=255, sum) * 100
+      rm(r)
     }
     
     # save metadata
-    df <- data.frame(directory=dirs, zenith=sz, azimuth=az, year=ay, 
-                     doy=ad, ulx=ul[,1], uly=ul[,2], lrx=lr[,1], lry=lr[,2])
+    df <- data.frame(date=adate, path=odr, processed=pdate, clear=cc, stringsAsFactors=F)
     write.csv(df, paste0(mPath, '/', basename(tpath[t]), '.csv'))
     
   }
-  
+
 }
