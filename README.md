@@ -48,4 +48,4 @@ For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> pa
 </p>
 
 <br>
-<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="800" height="300" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
+<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="600" height="300" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
