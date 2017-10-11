@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="113" src="http://www.julius-echter-gymnasium.de/cms/images/content/jeg/logos/logo_uni_wue.jpg"></a>
+<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="100" src="http://www.julius-echter-gymnasium.de/cms/images/content/jeg/logos/logo_uni_wue.jpg"></a>
 </p>
 
 
@@ -55,5 +55,5 @@ For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> pa
 <br>
 
 <p align="center">
-<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="975" height="400" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
+<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="950" height="400" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
 </p>
