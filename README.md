@@ -16,17 +16,13 @@ Want ot know what else we are up to? Click <a href="http://remote-sensing.eu/">h
 <i>LSFE</i> will be accessible through this gitHub. To install it, we require the <i>devtools</i> package
 </p>
 
-<br>
-
 ```R
 install.packages("devtools")
 require(devtools)
 ```
-<br>
 
 Then, we can install <i>LSFE</i> using the following command
 
-<br>
 
 ```R
 install_github("LSFE/LSFE-R")
