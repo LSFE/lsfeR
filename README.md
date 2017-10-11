@@ -12,8 +12,6 @@ This gitHub page displays code developed by the department of Remote Sensing of 
 
 </p>
 
-<br>
-
 ### Installation
 <p align="justify">
 <i>LSFE</i> will be accessible through this gitHub. To install it, we require the <i>devtools</i> package
@@ -26,12 +24,9 @@ require(devtools)
 
 Then, we can install <i>LSFE</i> using the following command
 
-
 ```R
 install_github("LSFE/LSFE-R")
 ```
-
-<br>
 
 ### Examples
 <p align="justify">
@@ -41,14 +36,10 @@ install_github("LSFE/LSFE-R")
 
 </p>
 
-<br>
-
 ### Bug reports & contact
 <p align="justify">
 For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> page. Feature requests and other contributions are also welcome.
 </p>
-
-<br>
 
 ### Contact
 <p align="center">
