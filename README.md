@@ -1,4 +1,9 @@
-<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="150" height="100" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg"></a>
+<p align="center">
+<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="173" src="https://www.google.de/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwiFrsXv5OjWAhVTahoKHcMkAp8QjRwIBw&url=http%3A%2F%2Fdhd-blog.org%2F%3Fp%3D8448&psig=AOvVaw2uMWGJhB9vpPLn0yfDh9s0&ust=1507818791911439"></a>
+</p>
+
+
+
 
 ### Promoting science through knowledge sharing in R
 <p align="justify">
