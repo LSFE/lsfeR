@@ -6,7 +6,7 @@ This gitHub page displays code developed by the department of Remote Sensing of 
 * <a href="https://github.com/16EAGLE/moveVis/">moveVis</a>
 * <a href="https://github.com/RRemelgado/rsMove/">rsMove</a>
 
-Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
+Want ot know what else we are up to? Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
 </p>
 
 <br>
