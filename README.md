@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="100" src="http://www.julius-echter-gymnasium.de/cms/images/content/jeg/logos/logo_uni_wue.jpg"></a>
+<a href="https://www.uni-wuerzburg.de/en/home/"><img width="950" height="100" src="http://www.julius-echter-gymnasium.de/cms/images/content/jeg/logos/logo_uni_wue.jpg"></a>
 </p>
 
 
