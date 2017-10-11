@@ -33,7 +33,9 @@ install_github("LSFE/LSFE-R")
 ### Examples
 <p align="justify">
   Want to know a bit more about the tools provided in <i>LSFE</i>? Check the examples below.
+  
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection</a>
+
 </p>
 
 <br>
@@ -42,9 +44,3 @@ install_github("LSFE/LSFE-R")
 <p align="justify">
 For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> page. Feature requests and other contributions are also welcome.
 </p>
-
-<br>
-
-### Aknowledgements
-<p align="justify">
-This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4en
