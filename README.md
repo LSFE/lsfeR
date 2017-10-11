@@ -42,10 +42,9 @@ For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> pa
 </p>
 
 ### Contact
-<p align="center">
+<p align="justify">
 How to reach us? Click the image bellow. Also, click <a href="http://remote-sensing.eu/">here</a> to see what else we are up to.
 </p>
-
 <p align="center">
 <a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="950" height="400" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
 <p align="center"><sub>Spatial distribution of ongoing projects</sub></p>
