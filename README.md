@@ -1,12 +1,11 @@
 ### Promoting science through knowledge sharing in R
 <p align="justify">
 This gitHub page displays code developed by the department of Remote Sensing of the University of Würzburg. The LSFE package was developed to ease the internal interoperability of ongoing projects and to facilitate the transferabily of concluded concluded research. To achieve this, this package offers user-friendly functions to create a local, standardized workspace and for pre-process and store satellite data easing the communication between researchers. Additionally, <i>LSFE</i> provides assess to packages published by our department on CRAN. Check out their gitHub pages through the links bellow!
+  
 * <a href="http://bleutner.github.io/RStoolbox/">RStoolbox</a>
 * <a href="https://github.com/16EAGLE/moveVis/">moveVis</a>
 * <a href="https://github.com/RRemelgado/rsMove/">rsMove</a>
-</p>
 
-<p align="justify">
 Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
 </p>
 
