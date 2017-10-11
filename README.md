@@ -56,8 +56,5 @@ How to reach us? Click the image bellow.
 
 <p align="center">
 <a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="950" height="400" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
-</p>
-
 <p align="center"><sub>Spatial distribution of ongoing projects</sub></p>
-
-
+</p>
