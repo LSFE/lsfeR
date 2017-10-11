@@ -1,5 +1,5 @@
 <p align="center">
-<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="173" src="https://www.google.de/url?sa=i&rct=j&q=&esrc=s&source=images&cd=&cad=rja&uact=8&ved=0ahUKEwiFrsXv5OjWAhVTahoKHcMkAp8QjRwIBw&url=http%3A%2F%2Fdhd-blog.org%2F%3Fp%3D8448&psig=AOvVaw2uMWGJhB9vpPLn0yfDh9s0&ust=1507818791911439"></a>
+<a href="https://www.uni-wuerzburg.de/en/home/"><img width="1209" height="113" src="http://www.julius-echter-gymnasium.de/cms/images/content/jeg/logos/logo_uni_wue.jpg"></a>
 </p>
 
 
@@ -53,4 +53,7 @@ For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> pa
 </p>
 
 <br>
-<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="600" height="300" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
+
+<p align="center">
+<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="1200" height="500" src="https://www.geographie.uni-wuerzburg.de/fileadmin/_processed_/5/2/csm_DieNeueWelt_20160615_0afc633079.png"></a>
+</p>
