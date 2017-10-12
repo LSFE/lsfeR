@@ -1,0 +1,15 @@
+Package: LSFE
+Type: Package
+Title: Lehrstuhl für Fernerkundung
+Version: 0.1.0
+Date: 2017-10-10
+Authors@R: c(person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de"), person("Thorsten", "Dahms", role = "aut", email="thorsten.dahms@uni-wuerzburg.de"), person("Christian", "Bauer", role = "aut", email="christian.bauer2@uni-wuerzburg.de"))
+Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
+URL: https://github.com/LSFE/LSFE-R/
+BugReports: https://github.com/LSFE/LSFE-R/issues/
+Description: Remote Sensing tools developed by the Department of Remote Sensing of the University of Wuerzburg (Germany).
+Encoding: UTF-8
+LazyData: TRUE
+Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr, RStoolbox, rsMove, moveVis
+RoxygenNote: 6.0.1
+License: GPL (>= 3)
