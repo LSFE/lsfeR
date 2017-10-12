@@ -32,7 +32,7 @@ install_github("LSFE/LSFE-R")
 <p align="justify">
   Want to know a bit more about the tools provided in <i>LSFE</i>? Check the examples below.
   
-* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection</a>
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">A uniform workspace</a>
 
 </p>
 
