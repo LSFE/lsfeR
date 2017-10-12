@@ -87,16 +87,16 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 # 3. unzip and store files
 #---------------------------------------------------------------------------------------------------------------------#
 
-  # determine output directories
-  odr <- as.character(sapply(files[ind], function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
-
   for (t in 1:length(ut)) {
 
     # make/check target directory
     tPath <- paste0(rPath, ut[t], '/')
     if(!dir.exists(tPath)) {dir.create(tPath)}
     ind <- which(tiles==ut[t])
-
+    
+    # determine output directories
+    odr <- as.character(sapply(files[ind], function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
+    
     for (f in 1:length(ind)) {
 
       # unzip file
