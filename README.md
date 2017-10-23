@@ -32,8 +32,10 @@ install_github("LSFE/LSFE-R")
 <p align="justify">
   Want to know a bit more about the tools provided in <i>LSFE</i>? Check the examples below.
   
-* <a href="">A uniform workspace</a>
+* <a href="https://github.com/LSFE/info/blob/master/example_1.md">A uniform workspace</a>
 * <a href="">contributing with your own function</a>
+* <a href="">Which tiles do I need? Determining data requirements</a>
+* <a href="">Standardized storage of satellite data</a>
 
 </p>
 
