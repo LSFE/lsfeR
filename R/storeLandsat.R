@@ -87,6 +87,9 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 # 3. unzip and store files
 #---------------------------------------------------------------------------------------------------------------------#
 
+  # determine output directories
+  odr <- as.character(sapply(files, function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
+  
   for (t in 1:length(ut)) {
 
     # make/check target directory
@@ -94,16 +97,13 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
     if(!dir.exists(tPath)) {dir.create(tPath)}
     ind <- which(tiles==ut[t])
     
-    # determine output directories
-    odr <- as.character(sapply(files[ind], function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
-    
     for (f in 1:length(ind)) {
 
       # unzip file
       untar(files[ind[f]], exdir=odr[ind[f]], tar = "internal")
 
       # if dealing with collection 1 translate quality layer
-      if (c1) {cc[ind[f]] <- ltBit(raster(odr[ind[f]]))} else {
+      if (c1) {cc[ind[f]] <- ltBit(odr[ind[f]])} else {
         r <- raster(list.files(odr[ind[f]], 'fmask.tif'))
         cc[ind[f]] <- cellStats(r==0) / cellStats(r!=255, sum) * 100
         rm(r)

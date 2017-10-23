@@ -15,7 +15,7 @@
 #'
 #' }
 #' @export
-#' @keywords Landsat, Storage
+#' @keywords Landsat Storage
 #' @seealso \code{\link{storeLandsat}} \code{\link{storeModis13Q1}}
 
 #----------------------------------------------------------------------------------------------------#
@@ -32,15 +32,15 @@ lsfeData <- function(path) {
 # 1. create folders
 #----------------------------------------------------------------------------------------------------#
 
+  oPath <- paste0(path, '/01_DATA/')
+  if (!dir.exists(oPath)) {dir.create(oPath)}
   oPath <- paste0(path, '/02_ANALYSIS/')
   if (!dir.exists(oPath)) {dir.create(oPath)}
   oPath <- paste0(path, '/03_DOCUMENTS/')
   if (!dir.exists(oPath)) {dir.create(oPath)}
   oPath <- paste0(path, '/04_CODE/')
   if (!dir.exists(oPath)) {dir.create(oPath)}
-  oPath <- paste0(path, '/05_TMP/')
-  if (!dir.exists(oPath)) {dir.create(oPath)}
-  oPath <- paste0(path, '/01_DATA/')
+  oPath <- paste0(path, '/05_SANDBOX/')
   if (!dir.exists(oPath)) {dir.create(oPath)}
 
 #----------------------------------------------------------------------------------------------------#

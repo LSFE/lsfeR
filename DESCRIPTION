@@ -10,6 +10,6 @@ BugReports: https://github.com/LSFE/LSFE-R/issues/
 Description: Remote Sensing tools developed by the Department of Remote Sensing of the University of Wuerzburg (Germany).
 Encoding: UTF-8
 LazyData: TRUE
-Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr, RStoolbox, rsMove, moveVis
+Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr, RStoolbox, rsMove, moveVis, devtools, roxygen2
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
