@@ -12,6 +12,18 @@ This gitHub page displays code developed by the department of Remote Sensing of 
 
 </p>
 
+<br>
+
+<p align="center">
+<img width="1024" height="513" src="https://github.com/LSFE/info/blob/master/startpage_figure-1.jpg"></a>
+</p>
+
+<p align="center">
+<sub>Figure 1 - LSFE concept.</sub>
+</p>
+
+<br>
+
 ### Installation
 <p align="justify">
 <i>LSFE</i> will be accessible through this gitHub. To install it, we require the <i>devtools</i> package
@@ -28,6 +40,8 @@ Then, we can install <i>LSFE</i> using the following command
 install_github("LSFE/LSFE-R")
 ```
 
+<br>
+
 ### Examples
 <p align="justify">
   Want to know a bit more about the tools provided in <i>LSFE</i>? Check the examples below.
@@ -39,10 +53,14 @@ install_github("LSFE/LSFE-R")
 
 </p>
 
+<br>
+
 ### Bug reports & contact
 <p align="justify">
 For bug reports, use <a href="https://github.com/LSFE/LSFE-R/issues">this</a> page. Feature requests and other contributions are also welcome.
 </p>
+
+<br>
 
 ### Contact
 <p align="justify">
