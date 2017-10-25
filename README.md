@@ -15,7 +15,7 @@ This gitHub page displays code developed by the department of Remote Sensing of 
 <br>
 
 <p align="center">
-<img width="1243" height="625" src="https://github.com/LSFE/info/blob/master/startpage_figure-1.jpg"></a>
+<img width="700" height="400" src="https://github.com/LSFE/info/blob/master/startpage_figure-1.jpg"></a>
 </p>
 
 <p align="center">
