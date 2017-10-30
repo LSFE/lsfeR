@@ -10,11 +10,11 @@ This gitHub page displays code developed by the department of Remote Sensing of 
 <br>
 
 <p align="center">
-<img width="700" height="400" src="https://github.com/LSFE/info/blob/master/startpage_figure-1.jpg"></a>
+<img width="700" height="400" src="https://github.com/LSFE/info/blob/master/startpage_figure-1.png"></a>
 </p>
 
 <p align="center">
-<sub>Figure 1 - LSFE concept.</sub>
+  <sub>Figure 1 - <i>LSFE</i> concept. The package serves as a platform for R tools developed within our department and as a incubator for future CRAN packages.</sub>
 </p>
 
 <br>
