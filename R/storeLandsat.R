@@ -1,9 +1,8 @@
 #' @title storeLandsat
 #'
-#' @description Temporal linear interpolation of raster data.
+#' @description Storage and sorting of Landsat Collection 1 data.
 #' @param zpPath Path where the zipped landsat data is stored
 #' @param dPath Path where the unzipped landsat data should be stored.
-#' @param c1 Is the data from USGS collection 1. Optional logicla argument. Default is TRUE.
 #' @param remove.files Should the zipped files be deleted after unpacking? Optional logical argument. Default is FALSE.
 #' @import raster sp
 #' @return A folder structure containing the input Landsat data
@@ -19,27 +18,25 @@
 #' provides metadata reporting on:
 #' \itemize{
 #' \item{\emph{"Date"} - Acquisition date.}
-#' \item{\emph{"Tile"} - Acquisition tile (i.e. path/row.}
-#' \item{\emph{"Path"} - Path to where the data is stored.}
+#' \item{\emph{"Product"} - Information on sensor and product.}
+#' \item{\emph{"Directory"} - Path to where the data is stored.}
 #' \item{\emph{"Cover"} - Cloud cover percent.}
 #' \item{\emph{"Processed"} - Date when the file was processed.}}
 #' @examples \dontrun{
 #'
 #' }
 #' @export
-#' @keywords Landsat, Storage
-#' @seealso \code{\link{storeLandsat}}
+#' @keywords internal
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
+storeLandsat <- function(zpPath, dPath, remove.files=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 0. check input variables
 #---------------------------------------------------------------------------------------------------------------------#
 
   # test source/output directories
-  if (!is.logical(c1)) {stop('"c1" is not a logical argument')}
   if (!is.logical(remove.files)) {stop('"remove.files" is not a logical argument')}
   if (!exists('zpPath')) {stop('"zpPath" missing')} else {zpPath <- file.path(zpPath)}
   if (!exists('dPath')) {stop('"dPath" missing')} else {dPath <- file.path(dPath)}
@@ -49,7 +46,7 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 #---------------------------------------------------------------------------------------------------------------------#
 
   # create base directory
-  ltPath <- paste0(dPath, '/LANDSAT/')
+  ltPath <- paste0(dPath, '/landsat/')
   dir.create(ltPath)
 
   # create SR/infos folder
@@ -57,10 +54,6 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
   if (!dir.exists(mPath)) {dir.create(mPath)}
   rPath <- paste0(ltPath, '/sr/') # reflectances
   if (!dir.exists(rPath)) {dir.create(rPath)}
-
-  # control variables for bit conversion
-  a<-2^(0:15)
-  b<-2*a
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. extract file info
@@ -79,8 +72,11 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
                           substr(basename(pdate), 7, 8), '-',
                           substr(basename(pdate), 9, 10)))
 
+  # extract sensor information
+  sat <- sapply(files, function(x) {strsplit(x, '_')[[1]][1]})
+
   # determine tiles
-  tiles <- substr(strsplit(basename(files), '-')[[1]][1], 5, 10)
+  tiles <- sapply(files, function(x) {substr(strsplit(basename(x), '-')[[1]][1], 5, 10)})
   ut <- unique(tiles)
 
 #---------------------------------------------------------------------------------------------------------------------#
@@ -89,33 +85,30 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 
   # determine output directories
   odr <- as.character(sapply(files, function(x){paste0(tPath, strsplit(basename(x), '-')[[1]][1])}))
-  
+
   for (t in 1:length(ut)) {
 
     # make/check target directory
     tPath <- paste0(rPath, ut[t], '/')
     if(!dir.exists(tPath)) {dir.create(tPath)}
     ind <- which(tiles==ut[t])
-    
+
     for (f in 1:length(ind)) {
 
       # unzip file
-      untar(files[ind[f]], exdir=odr[ind[f]], tar = "internal")
+      untar(files[ind[f]], exdir=odr[ind[f]], tar="internal")
 
       # if dealing with collection 1 translate quality layer
-      if (c1) {cc[ind[f]] <- ltBit(odr[ind[f]])} else {
-        r <- raster(list.files(odr[ind[f]], 'fmask.tif'))
-        cc[ind[f]] <- cellStats(r==0) / cellStats(r!=255, sum) * 100
-        rm(r)
-      }}}
+      cc[ind[f]] <- ltBit(odr[ind[f]])
 
-#---------------------------------------------------------------------------------------------------------------------#
-# 4. write metadata
-#---------------------------------------------------------------------------------------------------------------------#
+    }
 
-  # save metadata
-  df <- data.frame(Date=adate, Path=odr, Tile=tiles, Cover=cc, Processed=pdate, stringsAsFactors=F)
-  write.csv(df, paste0(mPath, 'metadata.csv'))
+    # save metadata
+    df <- data.frame(Date=adate[ind], Path=odr[ind], Product=sat[ind],
+                     Cover=cc[ind], Processed=pdate[ind], stringsAsFactors=F)
+    write.csv(df, paste0(mPath, ut[t], '_metadata.csv'))
+
+  }
 
   # if prompted, delete zipped files
   if (remove.files) {for (f in 1:length(files)) {file.remove(files[f])}}

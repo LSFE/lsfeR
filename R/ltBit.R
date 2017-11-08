@@ -4,9 +4,9 @@
 #' @param path Acquisition path.
 #' @import raster
 #' @return A \emph{raster} file with the native extention of the input.
-#' @details {The function translates Landsat Collection 1 bit quality information into an FMASK equivalent
-#' with labels for Water (1), Cloud Shadow (2),Snow (3), Cloud (4) and No Data (255) and
-#' provides metadata reporting on scene cloud cover. The output file will be names as \emph{"pixel_qa_mask"}}
+#' @details {The function translates Landsat Collection 1 bit quality information into an FMASK equivalent with
+#' labels for Water (1), Cloud Shadow (2),Snow (3), Cloud (4) and No Data (255) and provides metadata reporting
+#' on the percent of clear pixels. The output file will be names as \emph{"pixel_qa_mask"}}
 #' @examples \dontrun{
 #'
 #' }
@@ -22,7 +22,11 @@ ltBit <- function(path) {
 #---------------------------------------------------------------------------------------------------------------------#
 
   if (!dir.exists(path)) {stop('data path not found')}
-
+  
+  # control variables for bit conversion
+  a<-2^(0:15)
+  b<-2*a
+  
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. determine input / output files
 #---------------------------------------------------------------------------------------------------------------------#
