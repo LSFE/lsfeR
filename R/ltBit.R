@@ -1,12 +1,13 @@
 #' @title ltBit
 #'
 #' @description Translation of Landsat Collection 1 quality information.
-#' @param path Acquisition path.
+#' @param img Quality information image path.
 #' @import raster
 #' @return A \emph{raster} file with the native extention of the input.
 #' @details {The function translates Landsat Collection 1 bit quality information into an FMASK equivalent with
 #' labels for Water (1), Cloud Shadow (2),Snow (3), Cloud (4) and No Data (255) and provides metadata reporting
-#' on the percent of clear pixels. The output file will be names as \emph{"pixel_qa_mask"}}
+#' on the percent of clear pixels. The output file will be names as \emph{"pixel_qa_mask"} and will be added to
+#' the directory of \emph{img}.}
 #' @examples \dontrun{
 #'
 #' }
@@ -15,48 +16,47 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-ltBit <- function(path) {
+ltBit <- function(img) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 0. check input variables
 #---------------------------------------------------------------------------------------------------------------------#
 
-  if (!dir.exists(path)) {stop('data path not found')}
-  
-  # control variables for bit conversion
-  a<-2^(0:15)
-  b<-2*a
-  
+if (!file.exists(img)) {stop('QA image not found. Is the path correct?')}
+
+# control variables for bit conversion
+a<-2^(0:15)
+b<-2*a
+
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. determine input / output files
 #---------------------------------------------------------------------------------------------------------------------#
 
 # determine
-  ii <- list.files(path, 'pixel_qa.tif', full.names=T)
-  fe = extension(ii)
-  oi <- paste0(strsplit(ii, fe), '_mask', fe)
+fe = extension(img)
+oi <- paste0(strsplit(img, fe), '_mask', fe)
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. interpret quality information
 #---------------------------------------------------------------------------------------------------------------------#
 
-  rr0 <- raster(ii)
-  rr1 = getValues(rr0)
-  rb = as.integer((rr1 %% b[3])>=a[3])
-  rb = rb + (as.integer((rr1 %% b[4])>=a[4])*2)
-  rb = rb + (as.integer((rr1 %% b[6])>=a[6])*4)
-  rb = rb + ((as.integer((rr1 %% b[5])>=a[5])*3)*(rb==0))
-  rb[is.na(rb)] = 255
-  ccp <- sum(rb==0) / sum(rb!=255) * 100
-  rr0 = setValues(rr0, rb)
+rr0 <- raster(img)
+rr1 = getValues(rr0)
+rb = as.integer((rr1 %% b[3])>=a[3])
+rb = rb + (as.integer((rr1 %% b[4])>=a[4])*2)
+rb = rb + (as.integer((rr1 %% b[6])>=a[6])*4)
+rb = rb + ((as.integer((rr1 %% b[5])>=a[5])*3)*(rb==0))
+rb[is.na(rb)] = 255
+ccp <- sum(rb==0) / sum(rb!=255) * 100
+rr0 = setValues(rr0, rb)
 
-  rm(rr1, rb)
+rm(rr1, rb)
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 3. return output
 #---------------------------------------------------------------------------------------------------------------------#
 
-  writeRaster(rr0, filename=oi, datatype='INT1U', overwrite=TRUE)
+writeRaster(rr0, filename=oi, datatype='INT1U', overwrite=TRUE)
 
-  return(ccp)
+return(ccp)
 }
