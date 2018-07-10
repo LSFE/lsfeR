@@ -4,10 +4,14 @@
 \alias{estimateUTM}
 \title{estimateUTM}
 \usage{
-estimateUTM(ext)
+estimateUTM(x = NULL, y = NULL, ext = NULL)
 }
 \arguments{
-\item{ext}{Object of class \emph{extent} or one from which an extent can be derived. Alternatively, a vector or coordinates can be given.}
+\item{x}{Vector of x coordinates.}
+
+\item{y}{Vector of y coordinates.}
+
+\item{ext}{Object of class \emph{Extent}.}
 }
 \description{
 Determines adequate UTM zone for geographical coordinates.

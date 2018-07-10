@@ -1,4 +1,4 @@
-#' @title tileQuery
+#' @title satQuery
 #'
 #' @description Returns Satellite tile for a given location and a list available images on storage.
 #' @param sensor Target sensor. One of \emph{modis}, \emph{landsat} and \emph{sentinel2}.
@@ -27,7 +27,7 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-tileQuery <- function(sensor=NULL, ext=NULL, shp=NULL, tile=NULL, dpath=NULL) {
+satQuery <- function(sensor=NULL, ext=NULL, shp=NULL, tile=NULL, dpath=NULL) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 0. check input variables

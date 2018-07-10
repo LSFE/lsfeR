@@ -31,5 +31,5 @@ structure consists of:
 \seealso{
 \code{\link{storeLandsat}} \code{\link{storeModis13Q1}}
 }
-\keyword{Landsat,}
+\keyword{Landsat}
 \keyword{Storage}
