@@ -28,7 +28,7 @@ ltBit <- function(path) {
 #---------------------------------------------------------------------------------------------------------------------#
 
 # determine
-  ii <- list.files(path, 'pixel_qa.tif', full.names=TRUE)
+  ii <- list.files(path, 'pixel_qa.tif', full.names=T)
   fe = extension(ii)
   oi <- paste0(strsplit(ii, fe), '_mask', fe)
 
@@ -45,7 +45,7 @@ ltBit <- function(path) {
   rb = as.integer((rr1 %% b[3])>=a[3]) # water
   rb = rb + (as.integer((rr1 %% b[4])>=a[4])*2) # cloud shadow
   rb = rb + (as.integer((rr1 %% b[6])>=a[6])*4) # cloud
-  rb = rb + ((as.integer((rr1 %% b[5])>=a[5])*3)*(rb==0)) # snow
+  rb = rb + ((as.integer((rr1 %% b[5])>=a[5])*3)*(rb==0)) # snow 
   rb[is.na(rb)] = 255
   ccp <- sum(rb < 2) / sum(rb!=255) * 100
   rr0 = setValues(rr0, rb)

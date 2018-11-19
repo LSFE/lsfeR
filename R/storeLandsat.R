@@ -6,7 +6,6 @@
 #' @param c1 Is the data from USGS collection 1. Optional logicla argument. Default is TRUE.
 #' @param remove.files Should the zipped files be deleted after unpacking? Optional logical argument. Default is FALSE.
 #' @import raster sp
-#' @importFrom utils untar write.table
 #' @return A folder structure containing the input Landsat data
 #' @details {Local storing of landsat data as downloaded from the ESPA downloading service. A folder
 #' named \emph{LANDSAT}} will be create in the target directory and the output will be split between
@@ -29,6 +28,7 @@
 #' }
 #' @export
 #' @keywords Landsat, Storage
+#' @seealso \code{\link{storeLandsat}}
 
 #---------------------------------------------------------------------------------------------------------------------#
 
@@ -50,7 +50,7 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 
   # create base directory
   ltPath <- paste0(dPath, '/LANDSAT/')
-  if (!dir.exists(ltPath)) {dir.create(ltPath)}
+  if (!dir.exists(rPath)) {dir.create(ltPath)}
 
   # create SR/infos folder
   mPath <- paste0(ltPath, '/infos/') #  infos
@@ -85,7 +85,7 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 
   # determine output directories
   odr <- as.character(sapply(1:length(files), function(x){paste0(rPath, tiles[x], '/', strsplit(basename(files[x]), '-')[[1]][1])}))
-
+  
   for (t in 1:length(ut)) {
 
     # make/check target directory
@@ -94,9 +94,9 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
     ind <- which(tiles==ut[t])
 
     for (f in 1:length(ind)) {
-
+      
       if(!dir.exists(odr[ind[f]])) {dir.create(odr[ind[f]])}
-
+      
       # unzip file
       untar(files[ind[f]], exdir=odr[ind[f]], tar = "internal")
 
@@ -104,11 +104,11 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
       if (c1) {
         cc[ind[f]] <- ltBit(odr[ind[f]])
       } else {
-        r <- raster(list.files(odr[ind[f]], 'fmask.tif', full.names=TRUE))
+        r <- raster(list.files(odr[ind[f]], 'fmask.tif'))
         cc[ind[f]] <- cellStats(r==0) / cellStats(r!=255, sum) * 100
         rm(r)
       }
-
+      
     }
   }
 
@@ -118,12 +118,7 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 
   # save metadata
   df <- data.frame(Date=adate, Path=odr, Tile=tiles, Cover=cc, Processed=pdate, stringsAsFactors=F)
-
-  oname <- paste0(mPath, 'metadata.csv')
-  if (!file.exists(oname)) {
-    write.table(df, oname, sep=",")
-  } else {
-    write.table(df, oname, sep=",", col.names=FALSE, append=TRUE)}
+  write.csv(df, paste0(mPath, 'metadata.csv'))
 
   # if prompted, delete zipped files
   if (remove.files) {for (f in 1:length(files)) {file.remove(files[f])}}
