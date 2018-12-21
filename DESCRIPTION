@@ -11,6 +11,6 @@ Description: Remote Sensing tools developed by the Department of Remote Sensing 
 Encoding: UTF-8
 LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr, ggmap, RStoolbox, rsMove, moveVis, devtools, tmaptools
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 License: GPL (>= 3)
 vignetteBuilder: knitr

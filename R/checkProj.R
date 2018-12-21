@@ -58,7 +58,7 @@ checkProj <- function(x) {
 
 
   # extract data on the extent of each image
-  ext <- do.call(rbind, function(x, function(i) {if (!is.null(i)) {return(as.numeric(as.character(extent(i))))} else {return(c(0, 0, 0, 0))}}))
+  ext <- do.call(rbind, function(i) {if (!is.null(i)) {return(as.numeric(as.character(extent(i))))} else {return(c(0, 0, 0, 0))}})
 
 #---------------------------------------------------------------------------------------------------------------------------------------#
 # 2. projection frequency analysis
