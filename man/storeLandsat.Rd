@@ -44,5 +44,8 @@ provides metadata reporting on:
 
 }
 }
+\seealso{
+\code{\link{storeLandsat}}
+}
 \keyword{Landsat,}
 \keyword{Storage}

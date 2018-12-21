@@ -2,7 +2,7 @@
 #'
 #' @description Plots the distribution of images and area per spatial projection.
 #' @param x \emph{character} vector with a list of paths for the target images or a \emph{RasterLayer} objects.
-#' @importFrom raster crs res, extent
+#' @importFrom raster crs res extent
 #' @importFrom tmaptools get_proj4
 #' @return A \emph{list} object.
 #' @details {For each element in \emph{x}, the function extracts the projection string and estimates the area 
@@ -10,7 +10,7 @@
 #' unique projections and reports on the number of occurrences and the total area for each of them. The area 
 #' is defined by the maximum extent off all images of a given projection avoiding the over-estimation of the 
 #' area covered by e.g. tiles with a higher temporal coverage.. The output consists of:
-#' @itemize{
+#' \itemize{
 #'  \item{\emph{image.df} - \emph{data.frame} with image-wise reports on projection and area.}
 #'  \item{\emph{proj.df} - \emph{data.frame} with the overal image count and area per unique projection.}
 #'  \item{\emph{count.plot} - ggplot object with the distribution of images per unique projection.}

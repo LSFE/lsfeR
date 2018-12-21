@@ -29,7 +29,5 @@ structure consists of:
 }
 }
 \seealso{
-\code{\link{storeLandsat}} \code{\link{storeModis13Q1}}
+\code{\link{storeLandsat}}
 }
-\keyword{Landsat}
-\keyword{Storage}

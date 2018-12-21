@@ -15,8 +15,7 @@
 #'
 #' }
 #' @export
-#' @keywords Landsat Storage
-#' @seealso \code{\link{storeLandsat}} \code{\link{storeModis13Q1}}
+#' @seealso \code{\link{storeLandsat}}
 
 #----------------------------------------------------------------------------------------------------#
 

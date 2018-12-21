@@ -4,20 +4,28 @@
 \alias{estimateUTM}
 \title{estimateUTM}
 \usage{
-estimateUTM(x = NULL, y = NULL, ext = NULL)
+estimateUTM(x)
 }
 \arguments{
-\item{x}{Vector of x coordinates.}
-
-\item{y}{Vector of y coordinates.}
-
-\item{ext}{Object of class \emph{Extent}.}
+\item{x}{An object of class \emph{matrix}, \emph{data.frame} - with 2 columns containing x and y coordinates - or an \emph{extent} object.}
+}
+\value{
+A \emph{data.frame}.
 }
 \description{
 Determines adequate UTM zone for geographical coordinates.
 }
-\seealso{
-\code{\link{satQuery}}
+\details{
+{If \emph{x} is a \emph{matrix} or a \emph{data.frame}, the function looks at each rown and reports on:
+\itemize{
+\item{\emph{"zone"} - UTM zone.}
+\item{\emph{"orientation"} - UTM zone hemisphere ("N" or "S").}
+\item{\emph{"correct.crs"} - Correct zone projection code.}
+\item{\emph{"landsat.crs"} - Landsat projection code (always uses the northern hemisphere projection).}}
+If \emph{x} is an \emph{extent} object, the function will first derivre coordinate pairs for the corner and center of the object.
+
 }
-\keyword{Landsat,}
-\keyword{Storage}
+}
+\seealso{
+\code{\link{checkProj}}
+}

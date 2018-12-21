@@ -14,8 +14,7 @@
 #' }
 #' @importFrom raster crs
 #' @export
-#' @keywords Landsat, Storage
-#' @seealso \code{\link{satQuery}}
+#' @seealso \code{\link{checkProj}}
 
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 

@@ -25,6 +25,6 @@ provides metadata reporting on scene cloud cover. The output file will be names 
 
 }
 }
-\keyword{Landsat,}
-\keyword{Quality,}
-\keyword{Storage}
+\seealso{
+\code{\link{storeLandsat}}
+}
