@@ -27,7 +27,6 @@
 #'
 #' }
 #' @export
-#' @keywords Landsat, Storage
 #' @seealso \code{\link{storeLandsat}}
 
 #---------------------------------------------------------------------------------------------------------------------#
@@ -118,7 +117,8 @@ storeLandsat <- function(zpPath, dPath, c1=TRUE, remove.files=FALSE) {
 
   # save metadata
   df <- data.frame(Date=adate, Path=odr, Tile=tiles, Cover=cc, Processed=pdate, stringsAsFactors=F)
-  write.csv(df, paste0(mPath, 'metadata.csv'))
+  ofile <- paste0(mPath, 'metadata.csv')
+  if (file.exists(ofile)) {write.csv(df, opath, append=TRUE)} else {write.csv(df, opath)}
 
   # if prompted, delete zipped files
   if (remove.files) {for (f in 1:length(files)) {file.remove(files[f])}}
